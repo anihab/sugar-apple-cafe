@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="eng">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sugar Apple Cafe</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div id="app">
+            <!--welcome message-->
+            <header>
+                <h1>Welcome!</h1>
+                <p>Draw your avatar, join a room, and start chatting with friends!</p>
+            </header>
+            <!--pixel editor-->
+            <section id="pixel-editor-section">
+                <h2>Your Avatar</h2>
+                <canvas id="pixel-editor" width="128" height="128"></canvas>
+                <button id="toggle-color">Color</button>
+            </section>
+            <!--chat area-->
+            <section id="chat-section">
+                <div id="chat-room">
+                <h2>Chat Room</h2>
+                <div id="messages"></div>
+                <input type="text" id="chat-input" placeholder="Type a message...">
+                </div>
+            </section>
+        </div>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="app.js"></script>
+    </body>
+</html>
+
+<canvas id="pixel-editor" width="256" height="256"></canvas>

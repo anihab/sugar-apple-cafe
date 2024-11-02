@@ -10,9 +10,14 @@ let color = "#000";
 ctx.fillStyle = "#FFF";
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-// toggle color btn
-document.getElementById("toggle-color").addEventListener("click", () => {
-    color = color === "#000" ? "#FFF" : "#000"; // just black and white (for now)
+// // toggle color btn
+// document.getElementById("toggle-color").addEventListener("click", () => {
+//     color = color === "#000" ? "#FFF" : "#000"; // just black and white (for now)
+//   });
+
+// update color when user selects a new color
+document.getElementById("color-picker").addEventListener("input", (event) => {
+    color = event.target.value;
   });
 
 // click on canvas to draw
@@ -23,6 +28,20 @@ canvas.addEventListener("click", (event) => {
     ctx.fillRect(x, y, pixelSize, pixelSize);
 });
 
+// // convert to and get shareable data
+// function getPixelData() {
+//     const pixelData = [];
+//     for (let y = 0; y < gridSize; y++) {
+//       const row = [];
+//       for (let x = 0; x < gridSize; x++) {
+//         const pixel = ctx.getImageData(x * pixelSize, y * pixelSize, 1, 1).data;
+//         row.push(pixel[0] === 0 ? 1 : 0);  // 1 for black, 0 for white
+//       }
+//       pixelData.push(row);
+//     }
+//     return pixelData;
+// }
+
 // convert to and get shareable data
 function getPixelData() {
     const pixelData = [];
@@ -30,12 +49,15 @@ function getPixelData() {
       const row = [];
       for (let x = 0; x < gridSize; x++) {
         const pixel = ctx.getImageData(x * pixelSize, y * pixelSize, 1, 1).data;
-        row.push(pixel[0] === 0 ? 1 : 0);  // 1 for black, 0 for white
+        const hexColor = `#${((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2])
+          .toString(16)
+          .slice(1)}`;
+        row.push(hexColor);
       }
       pixelData.push(row);
     }
     return pixelData;
-}
+  }
 
 // WebSocket connection using Socket.IO
 const socket = io();

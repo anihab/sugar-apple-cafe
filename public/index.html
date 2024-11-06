@@ -19,13 +19,13 @@
             </header>
 
             <!--pixel editor-->
-            <section id="pixel-editor-section">
+            <section id="editor-container">
                 <h2>Your Icon</h2>
                 <canvas id="pixel-editor" width="128" height="128"></canvas>
-                <!-- <button id="toggle-color">Change Color</button> -->
                 <input type="color" id="color-picker" value="#000000">
+                <button id="join-button">Join Chatroom</button>
             </section>
-            
+
             <!--chat area-->
             <div id="chat-container">
 
@@ -38,11 +38,9 @@
                     <div id="history-messages">
                         <!-- historical messages will go here -->
                     </div>
+                    <input type="text" id="chat-input" placeholder="Type your message here..."/>
                 </div>
-
             </div>
-
-            <input type="text" id="chat-input" placeholder="Type your message here..."/>
         </div>
 
         <script src="/socket.io/socket.io.js"></script>

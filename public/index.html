@@ -21,13 +21,18 @@
                 <input type="color" id="color-picker" value="#000000">
             </section>
             <!--chat area-->
-            <section id="chat-section">
+            <div id="chatroom">
+                <!-- user icons and chat messages will be added dynamically here -->
+            </div>
+            <input type="text" id="chat-input" placeholder="Type your message here..."/>
+            <div id="messages-container"></div>
+            <!-- <section id="chat-section">
                 <div id="chat-room">
                 <h2>Chat Room</h2>
                 <div id="messages"></div>
                 <input type="text" id="chat-input" placeholder="Type a message...">
                 </div>
-            </section>
+            </section> -->
         </div>
         <script src="/socket.io/socket.io.js"></script>
         <script src="app.js"></script>

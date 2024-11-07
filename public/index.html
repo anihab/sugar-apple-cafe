@@ -1,50 +1,44 @@
 <!DOCTYPE html>
 <html lang="eng">
-
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Sugar Apple Cafe</title>
-        <link rel="stylesheet" href="style.css">
-    </head>
-
-    <body>
-
-        <div id="app">
-
-            <!--welcome message-->
-            <header>
-                <h1>Welcome!</h1>
-                <p>Draw your icon, join a room, and start chatting with friends!</p>
-            </header>
-
-            <!--pixel editor-->
-            <section id="editor-container">
-                <h2>Your Icon</h2>
-                <canvas id="pixel-editor" width="128" height="128"></canvas>
-                <input type="color" id="color-picker" value="#000000">
-                <button id="join-button">Join Chatroom</button>
-            </section>
-
-            <!--chat area-->
-            <div id="chat-container">
-
-                <div id="chatroom">
-                    <!-- user icons and chat messages will be added dynamically here -->
-                </div>
-
-                <div id="chat-history">
-                    <h3>Chat History</h3>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sugar Apple Cafe</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="welcome-page" class="welcome-container">
+        <h1>&#9825; welcome &#9825;</h1>
+        <p>draw your icon, join a room, and start chatting with friends!</p>
+        <div class="editor-container">
+            <canvas id="pixel-editor" width="128" height="128"></canvas>
+            <input type="color" id="color-picker" value="#000000">
+            <button id="join-button">Join</button>
+        </div>
+    </div>
+    <div id="chat-page" class="chat-container" style="display: none;">
+        <div class="chat-box">
+            <div id="chatroom" class="chatroom">
+                <!-- user icons and chat messages will be added dynamically here -->
+            </div>
+            <div class="side-panel">
+                <div class="user-panel"></div>
+                <div class="chat-history">
+                    <div class="header">
+                        <span>CHAT</span>
+                    </div>
                     <div id="history-messages">
                         <!-- historical messages will go here -->
                     </div>
-                    <input type="text" id="chat-input" placeholder="Type your message here..."/>
                 </div>
             </div>
         </div>
-
-        <script src="/socket.io/socket.io.js"></script>
-        <script src="app.js"></script>
-
-    </body>
+        <div class="input-area">
+            <input type="text" id="chat-input" placeholder="Type a message..." />
+            <button>Send</button>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
 </html>

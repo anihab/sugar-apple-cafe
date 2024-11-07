@@ -3,7 +3,9 @@ const canvas = document.getElementById("pixel-editor");
 const ctx = canvas.getContext("2d");
 const joinButton = document.getElementById("join-button");
 
-const chatContainer = document.getElementById("chat-container")
+const welcomePage = document.getElementById("welcome-page");
+const chatPage = document.getElementById("chat-page");
+
 const chatInput = document.getElementById("chat-input");
 const chatroom = document.getElementById("chatroom");
 const historyMessages = document.getElementById("history-messages");
@@ -103,10 +105,10 @@ function addToChatHistory(message, isLocalUser = true) {
 // join button event handler
 joinButton.addEventListener("click", () => {
   if (joinedChat) return;  // prevent re-joining if already joined
-  
+
   joinedChat = true;
-  chatContainer.style.display = "flex";  // show the chatroom
-  joinButton.style.display = "none";  // hide the join button
+  welcomePage.style.display = "none";
+  chatPage.style.display = "flex";
 
   socket.emit("join", { id: socket.id, icon: getPixelData(), position: userPosition });
   createOrUpdateUserIcon(socket.id, userPosition, getPixelData());

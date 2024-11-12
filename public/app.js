@@ -15,7 +15,6 @@ const gridSize = 8;    // 8x8 grid for pixel icon
 let color = "#000";
 let joinedChat = false;
 
-let userPosition = { x: 50, y: 50 };
 let userElement;
 let otherUsers = {};
 
@@ -110,6 +109,12 @@ joinButton.addEventListener("click", () => {
   welcomePage.style.display = "none";
   chatPage.style.display = "flex";
 
+  // Set initial user position to center of chatroom
+  userPosition = {
+    x: (chatroom.getBoundingClientRect().width - 128) / 2,
+    y: (chatroom.getBoundingClientRect().height - 128) / 2,
+  };
+
   socket.emit("join", { id: socket.id, icon: getPixelData(), position: userPosition });
   createOrUpdateUserIcon(socket.id, userPosition, getPixelData());
 });
@@ -118,23 +123,37 @@ joinButton.addEventListener("click", () => {
 document.addEventListener("keydown", (event) => {
   const step = 10;
   let moved = false;
+  const iconWidth = 128;
+  const iconHeight = 128;
+
+  // retrieve the actual width and height of the chatroom
+  const chatroomWidth = chatroom.offsetWidth;
+  const chatroomHeight = chatroom.offsetHeight;
 
   switch (event.key) {
     case "ArrowUp":
-      userPosition.y = Math.max(0, userPosition.y - step);
-      moved = true;
+      if (userPosition.y - step >= 0) {
+        userPosition.y -= step;
+        moved = true;
+      }
       break;
     case "ArrowDown":
-      userPosition.y = Math.min(chatroom.offsetHeight - 128, userPosition.y + step);
-      moved = true;
+      if (userPosition.y + step + iconHeight <= chatroomHeight) {
+        userPosition.y += step;
+        moved = true;
+      }
       break;
     case "ArrowLeft":
-      userPosition.x = Math.max(0, userPosition.x - step);
-      moved = true;
+      if (userPosition.x - step >= 0) {
+        userPosition.x -= step;
+        moved = true;
+      }
       break;
     case "ArrowRight":
-      userPosition.x = Math.min(chatroom.offsetWidth - 128, userPosition.x + step);
-      moved = true;
+      if (userPosition.x + step + iconWidth <= chatroomWidth) {
+        userPosition.x += step;
+        moved = true;
+      }
       break;
   }
   

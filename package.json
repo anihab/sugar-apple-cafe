@@ -1,7 +1,7 @@
 {
-    "name": "2bit-chatroom",
+    "name": "sugar-apple-cafe",
     "version": "1.0.0",
-    "description": "A simple 2-bit chatroom with pixel icons.",
+    "description": "A simple 2-bit chatroom with customizable pixel icons.",
     "main": "src/server.js",
     "scripts": {
         "start": "node src/server.js",
@@ -21,6 +21,5 @@
         "websocket",
         "socket.io"
     ],
-    "author": "Your Name",
-    "license": "MIT"
+    "author": "Anisa Habib"
 }

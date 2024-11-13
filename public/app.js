@@ -1,9 +1,8 @@
 // app.js
+// import default icons
 import bearIcon from './icons/bear.js';
 import rabbitIcon from './icons/rabbit.js';
 import catIcon from './icons/cat.js';
-
-const selectedIcon = { data: null, isCustom: false };
 
 const welcomePage = document.getElementById("welcome-page");
 const chatPage = document.getElementById("chat-page");

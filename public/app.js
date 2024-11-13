@@ -1,28 +1,35 @@
 // app.js
-const canvas = document.getElementById("pixel-editor");
-const ctx = canvas.getContext("2d");
-const joinButton = document.getElementById("join-button");
+import bearIcon from './icons/bear.js';
+import rabbitIcon from './icons/rabbit.js';
+import catIcon from './icons/cat.js';
+
+const selectedIcon = { data: null, isCustom: false };
 
 const welcomePage = document.getElementById("welcome-page");
 const chatPage = document.getElementById("chat-page");
+
+const canvas = document.getElementById("pixel-editor");
+const ctx = canvas.getContext("2d");
+const colorPicker = document.getElementById("color-picker");
+const joinButton = document.getElementById("join-button");
 
 const chatInput = document.getElementById("chat-input");
 const chatroom = document.getElementById("chatroom");
 const historyMessages = document.getElementById("history-messages");
 
-const pixelSize = 16;  // each 'pixel' will be 16x16 in the grid
-const gridSize = 8;    // 8x8 grid for pixel icon
+const pixelSize = 16;  // each pixel will be 16x16 in the grid
+const gridSize = 8;    // 8x8 grid for icon
 let color = "#000";
 let joinedChat = false;
 
-let userElement;
+let userPosition;
 let otherUsers = {};
 
 // initialize blank canvas
 ctx.fillStyle = "#fff";
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-document.getElementById("color-picker").addEventListener("input", (event) => {
+colorPicker.addEventListener("input", (event) => {
   color = event.target.value;
 });
 
@@ -31,9 +38,42 @@ canvas.addEventListener("click", (event) => {
   const y = Math.floor(event.offsetY / pixelSize) * pixelSize;
   ctx.fillStyle = color;
   ctx.fillRect(x, y, pixelSize, pixelSize);
+  selectedIcon.isCustom = true;
 });
 
-// convert to and get shareable data
+// render default icons on selection canvases
+function renderIcon(canvasId, pixelData) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  pixelData.forEach((row, y) => {
+    row.forEach((color, x) => {
+      ctx.fillStyle = color;
+      ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+    });
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderIcon("bear-icon", bearIcon);
+  renderIcon("rabbit-icon", rabbitIcon);
+  renderIcon("cat-icon", catIcon);
+});
+
+// icon selection
+document.getElementById("bear-icon").addEventListener("click", () => {
+  renderIcon("pixel-editor", bearIcon); // draw the given icon on the canvas
+});
+
+document.getElementById("rabbit-icon").addEventListener("click", () => {
+  renderIcon("pixel-editor", rabbitIcon);
+});
+
+document.getElementById("cat-icon").addEventListener("click", () => {
+  renderIcon("pixel-editor", catIcon)
+});
+
+// get pixel data from canvas
 function getPixelData() {
   const pixelData = [];
   for (let y = 0; y < gridSize; y++) {
@@ -88,7 +128,7 @@ function createOrUpdateUserIcon(id, position, pixelData, message) {
     const speechBubble = userElement.querySelector(".speech-bubble");
     speechBubble.textContent = message;
     speechBubble.style.visibility = "visible";
-    setTimeout(() => (speechBubble.style.visibility = "hidden"), 3000); // 3 seconds
+    setTimeout(() => (speechBubble.style.visibility = "hidden"), 30000); // 3 seconds
   }
 }
 
@@ -109,7 +149,7 @@ joinButton.addEventListener("click", () => {
   welcomePage.style.display = "none";
   chatPage.style.display = "flex";
 
-  // Set initial user position to center of chatroom
+  // set init position to center of chatroom
   userPosition = {
     x: (chatroom.getBoundingClientRect().width - 128) / 2,
     y: (chatroom.getBoundingClientRect().height - 128) / 2,

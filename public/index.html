@@ -7,15 +7,29 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Welcome Page -->
     <div id="welcome-page" class="welcome-container">
         <h1>&#9825; welcome &#9825;</h1>
         <p>draw your icon, join a room, and start chatting with friends!</p>
+        <!-- Icon Selection Area -->
+        <div class="selection-container">
+            <h3>Select an Icon</h3>
+            <div class="icon-options">
+                <canvas id="bear-icon" width="64" height="64"></canvas>
+                <canvas id="rabbit-icon" width="64" height="64"></canvas>
+                <canvas id="cat-icon" width="64" height="64"></canvas>
+            </div>
+        </div>
+
+        <!-- Icon Editor Area and Join Button -->
         <div class="editor-container">
             <canvas id="pixel-editor" width="128" height="128"></canvas>
             <input type="color" id="color-picker" value="#000000">
             <button id="join-button">Join</button>
         </div>
     </div>
+
+     <!-- Chat Page -->
     <div id="chat-page" class="chat-container" style="display: none;">
         <div class="chat-box">
             <div id="chatroom" class="chatroom">
@@ -39,6 +53,6 @@
         </div>
     </div>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>

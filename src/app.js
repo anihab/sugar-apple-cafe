@@ -1,4 +1,4 @@
-// server.js
+// app.js
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -25,7 +25,7 @@ io.on("connection", (socket) => {
     const { name, icon, position, roomId } = data;
 
     // if no roomId, generate a new one
-    let room = roomId || `room_${uuidv4()}`; // unique room ID
+    let room = roomId || `${uuidv4()}`; // unique room ID
     if (!rooms[room]) {
       rooms[room] = {};
       console.log("Room created:", room);

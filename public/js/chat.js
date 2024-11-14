@@ -1,38 +1,44 @@
-// app.js
+// chat.js
 // import default icons
-import bearIcon from './icons/bear.js';
-import rabbitIcon from './icons/rabbit.js';
-import catIcon from './icons/cat.js';
+import bearIcon from '../assets/icons/bear.js';
+import rabbitIcon from '../assets/icons/rabbit.js';
+import catIcon from '../assets/icons/cat.js';
 
+const pixelSize = 16;  // each pixel will be 16x16 in the grid
+const gridSize = 8;    // 8x8 grid for icon
+const step = 10;       // step for arrow movement
+const iconWidth = 128;
+const iconHeight = 128;
+
+// DOM elements
 const welcomePage = document.getElementById("welcome-page");
 const chatPage = document.getElementById("chat-page");
 
 const canvas = document.getElementById("pixel-editor");
 const ctx = canvas.getContext("2d");
 const colorPicker = document.getElementById("color-picker");
-const nameInput = document.getElementById("name-input");
 
+const nameInput = document.getElementById("name-input");
 const chatInput = document.getElementById("chat-input");
+
 const chatroom = document.getElementById("chatroom");
 const historyMessages = document.getElementById("history-messages");
 
 const joinButton = document.getElementById("join-button");
 const inviteButton = document.getElementById("invite-button");
-let inviteLink = "";
 
-const pixelSize = 16;  // each pixel will be 16x16 in the grid
-const gridSize = 8;    // 8x8 grid for icon
 let color = "#000";
 let userName = "";
 let joinedChat = false;
-
 let userPosition;
 let otherUsers = {};
+let inviteLink = "";
 
 // initialize blank canvas
 ctx.fillStyle = "#fff";
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+// canvas event handlers
 colorPicker.addEventListener("input", (event) => {
   color = event.target.value;
 });
@@ -44,7 +50,9 @@ canvas.addEventListener("click", (event) => {
   ctx.fillRect(x, y, pixelSize, pixelSize);
 });
 
-// render default icons on selection canvases
+// icon rendering
+const icons = { bear: bearIcon, rabbit: rabbitIcon, cat: catIcon };
+
 function renderIcon(canvasId, pixelData) {
   const canvas = document.getElementById(canvasId);
   const ctx = canvas.getContext("2d");
@@ -58,12 +66,10 @@ function renderIcon(canvasId, pixelData) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  renderIcon("bear-icon", bearIcon);
-  renderIcon("rabbit-icon", rabbitIcon);
-  renderIcon("cat-icon", catIcon);
+  Object.keys(icons).forEach(iconKey => renderIcon(`${iconKey}-icon`, icons[iconKey]));
 });
 
-// icon selection
+// icon selection event listeners
 document.getElementById("bear-icon").addEventListener("click", () => {
   renderIcon("pixel-editor", bearIcon); // draw the given icon on the canvas
 });
@@ -136,7 +142,7 @@ function createOrUpdateUserIcon(id, name, position, pixelData, message) {
   }
 }
 
-// add message to the chat history box
+// add message to chat history
 function addToChatHistory(name, message, isLocalUser = true) {
   const messageElement = document.createElement("div");
   messageElement.classList.add("chat-message", isLocalUser ? "local-message" : "remote-message"); // style the local user's messages differently
@@ -149,10 +155,6 @@ function addToChatHistory(name, message, isLocalUser = true) {
 joinButton.addEventListener("click", () => {
   if (joinedChat) return;  // prevent re-joining if already joined
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const roomId = urlParams.get("room") || null;
-
-  // get the username from the input field
   userName = nameInput.value.trim();
   if (!userName) {
     alert("Please enter a name before joining the chat.");
@@ -165,12 +167,12 @@ joinButton.addEventListener("click", () => {
 
   // set init position to center of chatroom
   userPosition = {
-    x: (chatroom.getBoundingClientRect().width - 128) / 2,
-    y: (chatroom.getBoundingClientRect().height - 128) / 2,
+    x: (chatroom.getBoundingClientRect().width - iconWidth) / 2,
+    y: (chatroom.getBoundingClientRect().height - iconHeight) / 2,
   };
 
-  console.log("Joining room:", roomId);
-  socket.emit("join", { name: userName, icon: getPixelData(), position: userPosition, roomId }); // include roomId
+  const roomId = new URLSearchParams(window.location.search).get("room") || null;
+  socket.emit("join", { name: userName, icon: getPixelData(), position: userPosition, roomId });
   createOrUpdateUserIcon(socket.id, userName, userPosition, getPixelData());
 });
 
@@ -179,22 +181,16 @@ inviteButton.addEventListener("click", () => {
   // copy the link to clipboard
   navigator.clipboard.writeText(inviteLink).then(() => {
     alert("Invite link copied to clipboard!");
-  }).catch((error) => {
-    console.error("Failed to copy: ", error);
-  });
+  }).catch((error) => console.error("Failed to copy: ", error));
 });
 
 // arrow keys for user movement
 document.addEventListener("keydown", (event) => {
-  const step = 10;
-  let moved = false;
-  const iconWidth = 128;
-  const iconHeight = 128;
-
   // retrieve the actual width and height of the chatroom
   const chatroomWidth = chatroom.offsetWidth;
   const chatroomHeight = chatroom.offsetHeight;
-
+  
+  let moved = false;
   switch (event.key) {
     case "ArrowUp":
       if (userPosition.y - step >= 0) {

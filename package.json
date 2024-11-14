@@ -2,10 +2,10 @@
     "name": "sugar-apple-cafe",
     "version": "1.0.0",
     "description": "A simple 2-bit chatroom with customizable pixel icons.",
-    "main": "src/server.js",
+    "main": "src/app.js",
     "scripts": {
-        "start": "node src/server.js",
-        "dev": "nodemon src/server.js"
+        "start": "node src/app.js",
+        "dev": "nodemon src/app.js"
     },
     "dependencies": {
         "express": "^4.21.1",
@@ -15,12 +15,5 @@
     "devDependencies": {
         "nodemon": "^3.0.0"
     },
-    "keywords": [
-        "chatroom",
-        "2-bit",
-        "pixel-art",
-        "websocket",
-        "socket.io"
-    ],
     "author": "Anisa Habib"
 }

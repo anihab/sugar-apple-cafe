@@ -11,11 +11,14 @@ const canvas = document.getElementById("pixel-editor");
 const ctx = canvas.getContext("2d");
 const colorPicker = document.getElementById("color-picker");
 const nameInput = document.getElementById("name-input");
-const joinButton = document.getElementById("join-button");
 
 const chatInput = document.getElementById("chat-input");
 const chatroom = document.getElementById("chatroom");
 const historyMessages = document.getElementById("history-messages");
+
+const joinButton = document.getElementById("join-button");
+const inviteButton = document.getElementById("invite-button");
+let inviteLink = "";
 
 const pixelSize = 16;  // each pixel will be 16x16 in the grid
 const gridSize = 8;    // 8x8 grid for icon
@@ -39,7 +42,6 @@ canvas.addEventListener("click", (event) => {
   const y = Math.floor(event.offsetY / pixelSize) * pixelSize;
   ctx.fillStyle = color;
   ctx.fillRect(x, y, pixelSize, pixelSize);
-  selectedIcon.isCustom = true;
 });
 
 // render default icons on selection canvases
@@ -147,6 +149,9 @@ function addToChatHistory(name, message, isLocalUser = true) {
 joinButton.addEventListener("click", () => {
   if (joinedChat) return;  // prevent re-joining if already joined
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const roomId = urlParams.get("room") || null;
+
   // get the username from the input field
   userName = nameInput.value.trim();
   if (!userName) {
@@ -164,8 +169,19 @@ joinButton.addEventListener("click", () => {
     y: (chatroom.getBoundingClientRect().height - 128) / 2,
   };
 
-  socket.emit("join", { id: socket.id, name: userName, icon: getPixelData(), position: userPosition });
+  console.log("Joining room:", roomId);
+  socket.emit("join", { name: userName, icon: getPixelData(), position: userPosition, roomId }); // include roomId
   createOrUpdateUserIcon(socket.id, userName, userPosition, getPixelData());
+});
+
+// invite button event handler
+inviteButton.addEventListener("click", () => {
+  // copy the link to clipboard
+  navigator.clipboard.writeText(inviteLink).then(() => {
+    alert("Invite link copied to clipboard!");
+  }).catch((error) => {
+    console.error("Failed to copy: ", error);
+  });
 });
 
 // arrow keys for user movement
@@ -245,15 +261,19 @@ socket.on("user moved", (data) => {
   }
 });
 
-socket.on("join", (users) => {
-  // iterate over the 'users' data object
-  Object.values(users).forEach((user) => {
-    if (!otherUsers[user.id]) {
-      createOrUpdateUserIcon(user.id, user.name, user.position, user.icon);
-    }
+// handle newly joining a room
+socket.on("joined room", ({ roomId, users }) => {
+  // update the chatroom with existing users
+  Object.values(users).forEach(user => {
+    createOrUpdateUserIcon(user.id, user.name, user.position, user.icon);
   });
+
+  // update the browser URL and inviteLink to match the current room
+  inviteLink = `${window.location.origin}/?room=${roomId}`;
+  window.history.pushState({}, "", `/?room=${roomId}`);
 });
 
+// handle disconnection
 socket.on("user disconnected", (userId) => {
   let userElement = otherUsers[userId];
   // remove disconnected user's icon from the chatroom

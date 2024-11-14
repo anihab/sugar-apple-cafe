@@ -10,6 +10,7 @@ const chatPage = document.getElementById("chat-page");
 const canvas = document.getElementById("pixel-editor");
 const ctx = canvas.getContext("2d");
 const colorPicker = document.getElementById("color-picker");
+const nameInput = document.getElementById("name-input");
 const joinButton = document.getElementById("join-button");
 
 const chatInput = document.getElementById("chat-input");
@@ -19,6 +20,7 @@ const historyMessages = document.getElementById("history-messages");
 const pixelSize = 16;  // each pixel will be 16x16 in the grid
 const gridSize = 8;    // 8x8 grid for icon
 let color = "#000";
+let userName = "";
 let joinedChat = false;
 
 let userPosition;
@@ -93,7 +95,7 @@ function getPixelData() {
 const socket = io();
 
 // create or update user's icon
-function createOrUpdateUserIcon(id, position, pixelData, message) {
+function createOrUpdateUserIcon(id, name, position, pixelData, message) {
   let userElement = otherUsers[id];
 
   if (!userElement) {
@@ -101,6 +103,7 @@ function createOrUpdateUserIcon(id, position, pixelData, message) {
     userElement.classList.add("user");
     userElement.innerHTML = `
       <canvas width="128" height="128"></canvas>
+      <div class="username">${name || ""}</div>
       <div class="speech-bubble"></div>
     `;
     chatroom.appendChild(userElement);
@@ -127,15 +130,15 @@ function createOrUpdateUserIcon(id, position, pixelData, message) {
     const speechBubble = userElement.querySelector(".speech-bubble");
     speechBubble.textContent = message;
     speechBubble.style.visibility = "visible";
-    setTimeout(() => (speechBubble.style.visibility = "hidden"), 30000); // 3 seconds
+    setTimeout(() => (speechBubble.style.visibility = "hidden"), 3000); // 3 seconds
   }
 }
 
 // add message to the chat history box
-function addToChatHistory(message, isLocalUser = true) {
+function addToChatHistory(name, message, isLocalUser = true) {
   const messageElement = document.createElement("div");
   messageElement.classList.add("chat-message", isLocalUser ? "local-message" : "remote-message"); // style the local user's messages differently
-  messageElement.textContent = message;
+  messageElement.textContent = `${name}: ${message}`;
   historyMessages.appendChild(messageElement);
   historyMessages.scrollTop = historyMessages.scrollHeight; // scroll to latest message
 }
@@ -143,6 +146,13 @@ function addToChatHistory(message, isLocalUser = true) {
 // join button event handler
 joinButton.addEventListener("click", () => {
   if (joinedChat) return;  // prevent re-joining if already joined
+
+  // get the username from the input field
+  userName = nameInput.value.trim();
+  if (!userName) {
+    alert("Please enter a name before joining the chat.");
+    return;
+  }
 
   joinedChat = true;
   welcomePage.style.display = "none";
@@ -154,8 +164,8 @@ joinButton.addEventListener("click", () => {
     y: (chatroom.getBoundingClientRect().height - 128) / 2,
   };
 
-  socket.emit("join", { id: socket.id, icon: getPixelData(), position: userPosition });
-  createOrUpdateUserIcon(socket.id, userPosition, getPixelData());
+  socket.emit("join", { id: socket.id, name: userName, icon: getPixelData(), position: userPosition });
+  createOrUpdateUserIcon(socket.id, userName, userPosition, getPixelData());
 });
 
 // arrow keys for user movement
@@ -197,7 +207,7 @@ document.addEventListener("keydown", (event) => {
   }
   
   if (moved) {
-    createOrUpdateUserIcon(socket.id, userPosition, getPixelData());
+    createOrUpdateUserIcon(socket.id, userName, userPosition, getPixelData());
     socket.emit("user moved", userPosition);
   }
 });
@@ -207,14 +217,15 @@ chatInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && chatInput.value.trim() !== "") {
     const message = {
       text: chatInput.value,
+      name: userName,
       icon: getPixelData(),
       position: userPosition,
       id: socket.id, // unique user ID
     };
 
     socket.emit("chat message", message);
-    createOrUpdateUserIcon(socket.id, userPosition, getPixelData(), message.text);
-    addToChatHistory(`You: ${message.text}`);
+    createOrUpdateUserIcon(socket.id, userName, userPosition, getPixelData(), message.text);
+    addToChatHistory(userName, message.text);
     chatInput.value = "";
   }
 });
@@ -222,51 +233,24 @@ chatInput.addEventListener("keydown", (event) => {
 // recieving chat messages
 socket.on("chat message", (msg) => {
   if (msg.id !== socket.id) {
-    createOrUpdateUserIcon(msg.id, msg.position, msg.icon, msg.text);
-    addToChatHistory(`${msg.id}: ${msg.text}`, false);
+    createOrUpdateUserIcon(msg.id, msg.name, msg.position, msg.icon, msg.text);
+    addToChatHistory(msg.name, msg.text, false);
   }
 });
 
 // detecting user movement
 socket.on("user moved", (data) => {
   if (data.id !== socket.id) {
-    createOrUpdateUserIcon(data.id, data.position);
+    createOrUpdateUserIcon(data.id, data.name, data.position);
   }
 });
 
 socket.on("join", (users) => {
   // iterate over the 'users' data object
   Object.values(users).forEach((user) => {
-    let otherUserElement = otherUsers[user.id];
-    if (!otherUserElement) {
-      // create and append the user's element if it's not already on the screen
-      otherUserElement = document.createElement("div");
-      otherUserElement.classList.add("user");
-
-      const iconCanvas = document.createElement("canvas");
-      iconCanvas.width = 128;
-      iconCanvas.height = 128;
-      otherUserElement.appendChild(iconCanvas);
-
-      const speechBubble = document.createElement("div");
-      speechBubble.classList.add("speech-bubble");
-      otherUserElement.appendChild(speechBubble);
-
-      chatroom.appendChild(otherUserElement);
-      otherUsers[user.id] = otherUserElement;
+    if (!otherUsers[user.id]) {
+      createOrUpdateUserIcon(user.id, user.name, user.position, user.icon);
     }
-
-    otherUserElement.style.left = `${user.position.x}px`;
-    otherUserElement.style.top = `${user.position.y}px`;
-
-    const iconCtx = otherUserElement.querySelector("canvas").getContext("2d");
-    iconCtx.clearRect(0, 0, 128, 128);
-    user.icon.forEach((row, y) => {
-      row.forEach((color, x) => {
-        iconCtx.fillStyle = color;
-        iconCtx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
-      });
-    });
   });
 });
 

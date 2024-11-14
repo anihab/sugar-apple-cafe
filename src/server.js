@@ -15,7 +15,7 @@ app.use(express.static(path.join(__dirname, "../public")));
 
 // WebSocket connection handler
 io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
+  console.log("User connected:", socket.id);
 
   // listen for the 'join' event when a user joins the chatroom
   socket.on("join", (data) => {
@@ -24,6 +24,7 @@ io.on("connection", (socket) => {
     // store user data (icon and position)
     users[socket.id] = {
       id: socket.id,
+      name: data.name,
       icon: data.icon,
       position: data.position,
     };
@@ -32,8 +33,8 @@ io.on("connection", (socket) => {
     // send existing users' positions and icons immediately upon joining
     socket.emit("join", users);  // sends to the newly joined user
 
-    // broadcast the user's data to all other clients
-    socket.broadcast.emit("join", users[socket.id]);
+    // broadcast to all other clients that a new user joined
+    socket.broadcast.emit("user joined", users[socket.id]);
 
     // broadcast to all clients when the user moves
     socket.on("user moved", (position) => {
@@ -46,7 +47,7 @@ io.on("connection", (socket) => {
       io.emit("chat message", msg);
     });
 
-    // handle disconnection
+    // handle disconnection and notify other clients
     socket.on("disconnect", () => {
       console.log("User disconnected:", socket.id);
       delete users[socket.id];
